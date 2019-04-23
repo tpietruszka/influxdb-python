@@ -261,14 +261,14 @@ class DataFrameClient(InfluxDBClient):
         # Convert dtype for json serialization
         dataframe = dataframe.astype('object')
 
-        precision_factor = {
+        precision_factor = int({
             "n": 1,
             "u": 1e3,
             "ms": 1e6,
             "s": 1e9,
             "m": 1e9 * 60,
             "h": 1e9 * 3600,
-        }.get(time_precision, 1)
+        }.get(time_precision, 1))
 
         points = [
             {'measurement': measurement,
@@ -331,22 +331,22 @@ class DataFrameClient(InfluxDBClient):
             field_columns = list(column_series[~column_series.isin(
                 tag_columns)])
 
-        precision_factor = {
+        precision_factor = np.int64({
             "n": 1,
             "u": 1e3,
             "ms": 1e6,
             "s": 1e9,
             "m": 1e9 * 60,
             "h": 1e9 * 3600,
-        }.get(time_precision, 1)
+        }.get(time_precision, 1))
 
         # Make array of timestamp ints
         if isinstance(dataframe.index, pd.PeriodIndex):
             time = ((dataframe.index.to_timestamp().values.astype(np.int64) //
-                     precision_factor).astype(np.int64).astype(str))
+                     precision_factor).astype(str))
         else:
             time = ((pd.to_datetime(dataframe.index).values.astype(np.int64) //
-                     precision_factor).astype(np.int64).astype(str))
+                     precision_factor).astype(str))
 
         # If tag columns exist, make an array of formatted tag keys and values
         if tag_columns:
